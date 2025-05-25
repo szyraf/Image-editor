@@ -1,0 +1,33 @@
+services:
+  # Development configuration
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      - wasm_files:/app/public/wasm
+    command: bun run dev
+    restart: unless-stopped
+    depends_on:
+      - wasm
+
+  wasm:
+    build:
+      context: .
+      dockerfile: Dockerfile.wasm
+    volumes:
+      - ./cpp:/app/cpp
+      - wasm_files:/app/public/wasm
+    restart: unless-stopped
+
+volumes:
+  wasm_files: 
