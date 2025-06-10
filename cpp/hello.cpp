@@ -1,14 +1,12 @@
-#include <string>
 #include <emscripten/bind.h>
+#include <string>
 
-using namespace emscripten;
-
-std::string hello()
+std::string greet()
 {
-    return "hello world";
+    return "Hello from WebAssembly!";
 }
 
-EMSCRIPTEN_BINDINGS(hello_module)
+EMSCRIPTEN_BINDINGS(my_module)
 {
-    function("hello", &hello);
+    emscripten::function("greet", &greet);
 }

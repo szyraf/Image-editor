@@ -10,12 +10,12 @@ services:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+      - NEXT_TELEMETRY_DISABLED=1
     volumes:
       - .:/app
       - /app/node_modules
       - /app/.next
       - wasm_files:/app/public/wasm
-    command: bun run dev
     restart: unless-stopped
     depends_on:
       - wasm
@@ -25,7 +25,8 @@ services:
       context: .
       dockerfile: Dockerfile.wasm
     volumes:
-      - ./cpp:/app/cpp
+      - ./cpp/CMakeLists.txt:/app/cpp/CMakeLists.txt
+      - ./cpp/hello.cpp:/app/cpp/hello.cpp
       - wasm_files:/app/public/wasm
     restart: unless-stopped
 

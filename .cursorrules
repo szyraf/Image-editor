@@ -1,1 +1,6 @@
-DON'T WRITE COMMENTS IN CODE, WRITE SELF EXPLANATORY CODE WITH SELF EXPLANATORY NAMES!
+Next.js
+- DON'T WRITE COMMENTS IN CODE, WRITE SELF EXPLANATORY CODE! If you must write comments, write docstrings.
+- ONLY SHADCN DARK MODE - NO LIGHT MODE!. Don't use much custom tailwind classes - use shadcn classes instead.
+
+`.cpp`:
+- WRITE DOCSTRINGS FOR ALL FUNCTIONS!
