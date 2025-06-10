@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, DragEvent, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Upload, Image as ImageIcon, Loader2 } from 'lucide-react'
 
