@@ -3,12 +3,17 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { ArrowLeft } from 'lucide-react'
+import { useWasm } from '@/contexts/WasmContext'
+import WasmHello from '../components/WasmHello'
+import LoadingState from '@/components/LoadingState'
+import ErrorState from '@/components/ErrorState'
 
 export default function EditorPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [imageName, setImageName] = useState<string | null>(null)
+  const { instance, isLoading, error } = useWasm()
   const router = useRouter()
 
   useEffect(() => {
@@ -32,17 +37,12 @@ export default function EditorPage() {
     router.push('/')
   }
 
-  if (!imageUrl) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card>
-          <CardContent className="flex items-center justify-center p-6">
-            <Loader2 className="w-6 h-6 mr-2 animate-spin" />
-            <p className="text-muted-foreground">Loading image...</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  if (isLoading || !imageUrl) {
+    return <LoadingState message={isLoading ? 'Loading WASM module...' : 'Loading image...'} />
+  }
+
+  if (error || !instance) {
+    return <ErrorState message={error || 'WASM instance not available'} />
   }
 
   return (
@@ -75,6 +75,8 @@ export default function EditorPage() {
           </Card>
         </div>
       </main>
+
+      <WasmHello />
     </div>
   )
 }

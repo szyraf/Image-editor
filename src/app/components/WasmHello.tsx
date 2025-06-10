@@ -1,6 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useWasm } from '@/contexts/WasmContext'
 
-export default function WasmHello({ instance }: { instance: any }) {
+export default function WasmHello() {
+  const { instance } = useWasm()
+
+  if (!instance) {
+    return <p>No wasm instance :C</p>
+  }
+
   const message = instance.greet()
 
   return (

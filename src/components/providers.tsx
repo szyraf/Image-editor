@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from 'next-themes'
 import { ReactNode } from 'react'
+import { WasmProvider } from '@/contexts/WasmContext'
 
 interface ProvidersProps {
   children: ReactNode
@@ -9,14 +10,8 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
-      forcedTheme="dark"
-      enableSystem={false}
-      disableTransitionOnChange
-    >
-      {children}
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
+      <WasmProvider>{children}</WasmProvider>
     </ThemeProvider>
   )
 }
