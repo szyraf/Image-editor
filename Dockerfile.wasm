@@ -6,10 +6,6 @@ RUN mkdir -p public/wasm
 
 RUN apt-get update && apt-get install -y inotify-tools
 
-# COPY watch-cpp.sh .
-# RUN chmod +x watch-cpp.sh
-# CMD ["./watch-cpp.sh"] 
-
 COPY build-wasm.sh .
 RUN chmod +x build-wasm.sh
 CMD ["./build-wasm.sh"]

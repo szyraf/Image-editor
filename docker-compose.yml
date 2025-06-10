@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
@@ -26,9 +26,10 @@ services:
       dockerfile: Dockerfile.wasm
     volumes:
       - ./cpp/CMakeLists.txt:/app/cpp/CMakeLists.txt
-      - ./cpp/hello.cpp:/app/cpp/hello.cpp
+      - ./cpp/main.cpp:/app/cpp/main.cpp
+      - ./cpp/brightness.cpp:/app/cpp/brightness.cpp
       - wasm_files:/app/public/wasm
     restart: unless-stopped
 
 volumes:
-  wasm_files: 
+  wasm_files:

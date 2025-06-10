@@ -31,7 +31,7 @@ export const WasmProvider = ({ children }: WasmProviderProps) => {
     const loadWasm = async () => {
       try {
         // @ts-ignore
-        const wasmModule = await import('@/public/wasm/hello.js')
+        const wasmModule = await import('@/public/wasm/main.js')
         const wasmInstance = await wasmModule.default()
         setInstance(wasmInstance)
         setError(null)

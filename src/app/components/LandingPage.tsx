@@ -8,6 +8,7 @@ import { Upload, Image as ImageIcon, Loader2 } from 'lucide-react'
 const SAMPLE_IMAGES = [
   { id: 1, src: '/sample-images/sample1.jpg', name: 'Sample Image 1' },
   { id: 2, src: '/sample-images/sample2.jpg', name: 'Sample Image 2' },
+  { id: 3, src: '/sample-images/sample3.jpg', name: 'Sample Image 3' },
 ]
 
 export default function LandingPage() {

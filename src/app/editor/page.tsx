@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useWasm } from '@/contexts/WasmContext'
 import LoadingState from '@/components/LoadingState'
 import ErrorState from '@/components/ErrorState'
-import FullscreenImageViewer from '@/components/FullscreenImageViewer'
+import FullscreenImageViewer from '@/components/fullscreen-viewer'
 
 export default function EditorPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
