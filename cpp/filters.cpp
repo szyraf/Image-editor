@@ -299,17 +299,17 @@ emscripten::val convertToMonochrome(emscripten::val imageData, int width, int he
  * @brief Adjusts brightness by adding constant value to RGB channels
  *
  * Linear adjustment: new_channel = clamp(original + adjustment, 0, 255)
- * where adjustment = (brightnessValue / 100) × 255
+ * where adjustment = brightnessValue
  *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param brightnessValue Brightness percentage (-100 to +100, 0 = no change)
+ * @param brightnessValue Brightness adjustment (-255 to +255, 0 = no change)
  * @return Modified imageData with adjusted brightness, alpha preserved
  */
 emscripten::val adjustBrightness(emscripten::val imageData, int width, int height, float brightnessValue)
 {
-  float brightnessAdjustment = (brightnessValue / 100.0f) * 255.0f;
+  float brightnessAdjustment = brightnessValue;
 
   int length = width * height * 4;
 
@@ -350,12 +350,12 @@ emscripten::val adjustBrightness(emscripten::val imageData, int width, int heigh
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param contrastValue Contrast percentage (0-200 range, 100 = no change)
+ * @param contrastValue Contrast percentage (-255 to 255 range, 0 = no change)
  * @return Modified imageData with adjusted contrast, alpha preserved
  */
 emscripten::val adjustContrast(emscripten::val imageData, int width, int height, float contrastValue)
 {
-  float contrast = contrastValue / 100.0f;
+  float contrast = (contrastValue) / 255.0f;
   float factor = (259.0f * (contrast * 255.0f + 255.0f)) / (255.0f * (259.0f - contrast * 255.0f));
 
   int length = width * height * 4;
@@ -423,53 +423,6 @@ emscripten::val adjustSaturation(emscripten::val imageData, int width, int heigh
     modifiedData[i + 1] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, g)));
     modifiedData[i + 2] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, b)));
     modifiedData[i + 3] = static_cast<uint8_t>(a);
-  }
-
-  emscripten::val result = emscripten::val::array();
-  for (int i = 0; i < length; ++i)
-  {
-    result.call<void>("push", modifiedData[i]);
-  }
-
-  return result;
-}
-
-/**
- * @brief Applies gamma correction using power-law transformation with lookup table
- *
- * Pre-computes lookup table: output = 255 × (input/255)^(1/gamma)
- * Gamma < 1.0 brightens mid-tones, gamma > 1.0 darkens mid-tones.
- *
- * @param imageData Uint8ClampedArray containing RGBA pixel data
- * @param width Width of the image in pixels
- * @param height Height of the image in pixels
- * @param gamma Gamma value (0.1-3.0 range, 1.0 = no change)
- * @return Modified imageData with gamma correction applied, alpha preserved
- */
-emscripten::val adjustGamma(emscripten::val imageData, int width, int height, float gamma)
-{
-  int length = width * height * 4;
-  std::vector<uint8_t> modifiedData(length);
-
-  std::vector<uint8_t> gammaTable(256);
-  for (int i = 0; i < 256; ++i)
-  {
-    float normalized = i / 255.0f;
-    float corrected = std::pow(normalized, 1.0f / gamma);
-    gammaTable[i] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, corrected * 255.0f)));
-  }
-
-  for (int i = 0; i < length; i += 4)
-  {
-    uint8_t r = static_cast<uint8_t>(imageData[i].as<int>());
-    uint8_t g = static_cast<uint8_t>(imageData[i + 1].as<int>());
-    uint8_t b = static_cast<uint8_t>(imageData[i + 2].as<int>());
-    uint8_t a = static_cast<uint8_t>(imageData[i + 3].as<int>());
-
-    modifiedData[i] = gammaTable[r];
-    modifiedData[i + 1] = gammaTable[g];
-    modifiedData[i + 2] = gammaTable[b];
-    modifiedData[i + 3] = a;
   }
 
   emscripten::val result = emscripten::val::array();

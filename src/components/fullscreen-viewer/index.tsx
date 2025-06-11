@@ -12,6 +12,7 @@ import { DebugMenu } from './components/DebugMenu'
 import { EditPanel } from './components/EditPanel'
 import { ImageControls } from './components/ImageControls'
 import { ImageFilters, ColorAdjustments } from './types'
+import { DEFAULT_IMAGE_FILTERS, DEFAULT_COLOR_ADJUSTMENTS } from './constants'
 
 export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onClose }: FullscreenImageViewerProps) {
   const {
@@ -35,21 +36,20 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
   const { panelPosition, handlePanelMouseDown, handlePanelMouseMove, handlePanelMouseUp, handleWindowResize } =
     usePanelDrag()
 
-  const { filters, colorAdjustments, updateFilter, updateColorAdjustment, resetAll } = useImageFilters()
+  const {
+    filters,
+    colorAdjustments,
+    updateFilter,
+    updateColorAdjustment,
+    resetFilter,
+    resetColorAdjustment,
+    resetAll,
+  } = useImageFilters()
 
-  const [committedFilters, setCommittedFilters] = useState<ImageFilters>({
-    blur: 0,
-    sharpen: 0,
-    pixelate: 0,
-  })
+  const [committedFilters, setCommittedFilters] = useState<ImageFilters>(DEFAULT_IMAGE_FILTERS)
 
-  const [committedColorAdjustments, setCommittedColorAdjustments] = useState<ColorAdjustments>({
-    monochrome: false,
-    brightness: 100,
-    contrast: 100,
-    saturation: 100,
-    gamma: 100,
-  })
+  const [committedColorAdjustments, setCommittedColorAdjustments] =
+    useState<ColorAdjustments>(DEFAULT_COLOR_ADJUSTMENTS)
 
   const [selectedFormat, setSelectedFormat] = useState<'png' | 'jpeg' | 'webp'>('png')
   const [jpegQuality, setJpegQuality] = useState(90)
@@ -70,20 +70,26 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
     setCommittedColorAdjustments((prev) => ({ ...prev, [key]: value }))
   }, [])
 
+  const handleFilterReset = useCallback(
+    (key: keyof ImageFilters) => {
+      resetFilter(key)
+      setCommittedFilters((prev) => ({ ...prev, [key]: DEFAULT_IMAGE_FILTERS[key] }))
+    },
+    [resetFilter]
+  )
+
+  const handleColorAdjustmentReset = useCallback(
+    (key: keyof ColorAdjustments) => {
+      resetColorAdjustment(key)
+      setCommittedColorAdjustments((prev) => ({ ...prev, [key]: DEFAULT_COLOR_ADJUSTMENTS[key] }))
+    },
+    [resetColorAdjustment]
+  )
+
   const handleResetAll = useCallback(() => {
     resetAll()
-    setCommittedFilters({
-      blur: 0,
-      sharpen: 0,
-      pixelate: 0,
-    })
-    setCommittedColorAdjustments({
-      monochrome: false,
-      brightness: 100,
-      contrast: 100,
-      saturation: 100,
-      gamma: 100,
-    })
+    setCommittedFilters(DEFAULT_IMAGE_FILTERS)
+    setCommittedColorAdjustments(DEFAULT_COLOR_ADJUSTMENTS)
   }, [resetAll])
 
   const handleDownload = useCallback(
@@ -254,6 +260,8 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
         onColorAdjustmentChange={updateColorAdjustment}
         onFilterCommit={handleFilterCommit}
         onColorAdjustmentCommit={handleColorAdjustmentCommit}
+        onFilterReset={handleFilterReset}
+        onColorAdjustmentReset={handleColorAdjustmentReset}
         onResetAll={handleResetAll}
         onDownload={handleDownload}
         onPreviewQuality={handlePreviewQuality}

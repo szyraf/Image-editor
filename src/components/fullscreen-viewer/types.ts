@@ -21,7 +21,6 @@ export interface ColorAdjustments {
   brightness: number
   contrast: number
   saturation: number
-  gamma: number
 }
 
 export interface ViewerState {

@@ -41,8 +41,7 @@ export const useImageProcessor = (originalImageUrl: string | null, imageName?: s
           options.colorAdjustments.monochrome,
           options.filters.blur,
           options.filters.sharpen,
-          options.filters.pixelate,
-          options.colorAdjustments.gamma
+          options.filters.pixelate
         )
 
         return canvas

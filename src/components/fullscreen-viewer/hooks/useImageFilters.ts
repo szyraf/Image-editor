@@ -1,20 +1,11 @@
 import { useState } from 'react'
 import { ImageFilters, ColorAdjustments } from '../types'
+import { DEFAULT_IMAGE_FILTERS, DEFAULT_COLOR_ADJUSTMENTS } from '../constants'
 
 export const useImageFilters = () => {
-  const [filters, setFilters] = useState<ImageFilters>({
-    blur: 0,
-    sharpen: 0,
-    pixelate: 0,
-  })
+  const [filters, setFilters] = useState<ImageFilters>(DEFAULT_IMAGE_FILTERS)
 
-  const [colorAdjustments, setColorAdjustments] = useState<ColorAdjustments>({
-    monochrome: false,
-    brightness: 100,
-    contrast: 100,
-    saturation: 100,
-    gamma: 100,
-  })
+  const [colorAdjustments, setColorAdjustments] = useState<ColorAdjustments>(DEFAULT_COLOR_ADJUSTMENTS)
 
   const updateFilter = (key: keyof ImageFilters, value: number) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -24,19 +15,17 @@ export const useImageFilters = () => {
     setColorAdjustments((prev) => ({ ...prev, [key]: value }))
   }
 
+  const resetFilter = (key: keyof ImageFilters) => {
+    setFilters((prev) => ({ ...prev, [key]: DEFAULT_IMAGE_FILTERS[key] }))
+  }
+
+  const resetColorAdjustment = (key: keyof ColorAdjustments) => {
+    setColorAdjustments((prev) => ({ ...prev, [key]: DEFAULT_COLOR_ADJUSTMENTS[key] }))
+  }
+
   const resetAll = () => {
-    setFilters({
-      blur: 0,
-      sharpen: 0,
-      pixelate: 0,
-    })
-    setColorAdjustments({
-      monochrome: false,
-      brightness: 100,
-      contrast: 100,
-      saturation: 100,
-      gamma: 100,
-    })
+    setFilters(DEFAULT_IMAGE_FILTERS)
+    setColorAdjustments(DEFAULT_COLOR_ADJUSTMENTS)
   }
 
   return {
@@ -44,6 +33,8 @@ export const useImageFilters = () => {
     colorAdjustments,
     updateFilter,
     updateColorAdjustment,
+    resetFilter,
+    resetColorAdjustment,
     resetAll,
   }
 }
