@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { X, Settings, Loader2, Info } from 'lucide-react'
 import { Position, ImageFilters, ColorAdjustments } from '../types'
+import { DownloadPanel } from './DownloadPanel'
 
 interface EditPanelProps {
   showEditPanel: boolean
@@ -22,6 +23,14 @@ interface EditPanelProps {
   onFilterCommit: (key: keyof ImageFilters, value: number) => void
   onColorAdjustmentCommit: (key: keyof ColorAdjustments, value: number | boolean) => void
   onResetAll: () => void
+  onDownload?: (format: 'png' | 'jpeg' | 'webp', quality?: number) => void
+  onPreviewQuality?: (format: 'png' | 'jpeg' | 'webp', quality: number) => void
+  selectedFormat?: 'png' | 'jpeg' | 'webp'
+  jpegQuality?: number
+  webpQuality?: number
+  onFormatChange?: (format: 'png' | 'jpeg' | 'webp') => void
+  onJpegQualityChange?: (quality: number) => void
+  onWebpQualityChange?: (quality: number) => void
 }
 
 export const EditPanel = ({
@@ -37,6 +46,14 @@ export const EditPanel = ({
   onFilterCommit,
   onColorAdjustmentCommit,
   onResetAll,
+  onDownload,
+  onPreviewQuality,
+  selectedFormat,
+  jpegQuality,
+  webpQuality,
+  onFormatChange,
+  onJpegQualityChange,
+  onWebpQualityChange,
 }: EditPanelProps) => {
   if (!showEditPanel) {
     return (
@@ -225,6 +242,23 @@ export const EditPanel = ({
         </div>
 
         <Separator />
+
+        {onDownload && onPreviewQuality && (
+          <>
+            <DownloadPanel
+              onDownload={onDownload}
+              onPreviewQuality={onPreviewQuality}
+              isProcessing={isProcessing}
+              selectedFormat={selectedFormat}
+              jpegQuality={jpegQuality}
+              webpQuality={webpQuality}
+              onFormatChange={onFormatChange}
+              onJpegQualityChange={onJpegQualityChange}
+              onWebpQualityChange={onWebpQualityChange}
+            />
+            <Separator />
+          </>
+        )}
 
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex-1" onClick={onResetAll}>

@@ -7,7 +7,7 @@ import { FullscreenImageViewerProps } from './types'
 import { useImageViewer } from './hooks/useImageViewer'
 import { usePanelDrag } from './hooks/usePanelDrag'
 import { useImageFilters } from './hooks/useImageFilters'
-import { useImageProcessing } from './hooks/useImageProcessing'
+import { useImageProcessor } from './hooks/useImageProcessor'
 import { DebugMenu } from './components/DebugMenu'
 import { EditPanel } from './components/EditPanel'
 import { ImageControls } from './components/ImageControls'
@@ -48,7 +48,16 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
     gamma: 100,
   })
 
-  const { processedImageUrl, processImage, isProcessing } = useImageProcessing(imageUrl)
+  const [selectedFormat, setSelectedFormat] = useState<'png' | 'jpeg' | 'webp'>('png')
+  const [jpegQuality, setJpegQuality] = useState(90)
+  const [webpQuality, setWebpQuality] = useState(90)
+
+  const {
+    downloadImage,
+    updatePreview,
+    previewUrl,
+    isProcessing: isDownloadProcessing,
+  } = useImageProcessor(imageUrl, imageName || undefined)
 
   const handleFilterCommit = useCallback((key: keyof ImageFilters, value: number) => {
     setCommittedFilters((prev) => ({ ...prev, [key]: value }))
@@ -74,6 +83,38 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
     })
   }, [resetAll])
 
+  const handleDownload = useCallback(
+    (format: 'png' | 'jpeg' | 'webp', quality?: number) => {
+      downloadImage(format, { filters: committedFilters, colorAdjustments: committedColorAdjustments }, quality)
+    },
+    [downloadImage, committedFilters, committedColorAdjustments]
+  )
+
+  const handlePreviewQuality = useCallback(
+    (format: 'png' | 'jpeg' | 'webp', quality: number) => {
+      updatePreview(format, quality, { filters: committedFilters, colorAdjustments: committedColorAdjustments })
+    },
+    [updatePreview, committedFilters, committedColorAdjustments]
+  )
+
+  const getCurrentQuality = useCallback(() => {
+    if (selectedFormat === 'jpeg') return jpegQuality
+    if (selectedFormat === 'webp') return webpQuality
+    return 100
+  }, [selectedFormat, jpegQuality, webpQuality])
+
+  const handleFormatChange = useCallback((format: 'png' | 'jpeg' | 'webp') => {
+    setSelectedFormat(format)
+  }, [])
+
+  const handleJpegQualityChange = useCallback((quality: number) => {
+    setJpegQuality(quality)
+  }, [])
+
+  const handleWebpQualityChange = useCallback((quality: number) => {
+    setWebpQuality(quality)
+  }, [])
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -90,9 +131,12 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
 
   useEffect(() => {
     if (isOpen) {
-      void processImage({ filters: committedFilters, colorAdjustments: committedColorAdjustments })
+      updatePreview(selectedFormat, getCurrentQuality(), {
+        filters: committedFilters,
+        colorAdjustments: committedColorAdjustments,
+      })
     }
-  }, [committedFilters, committedColorAdjustments, isOpen, processImage])
+  }, [committedFilters, committedColorAdjustments])
 
   useEffect(() => {
     if (isOpen) {
@@ -169,7 +213,7 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
 
         <img
           ref={imageRef}
-          src={processedImageUrl || imageUrl}
+          src={previewUrl || imageUrl}
           alt={imageName || 'Fullscreen image'}
           className="absolute select-none pointer-events-none"
           style={{
@@ -186,7 +230,7 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
         panelPosition={panelPosition}
         filters={filters}
         colorAdjustments={colorAdjustments}
-        isProcessing={isProcessing}
+        isProcessing={isDownloadProcessing}
         onTogglePanel={toggleEditPanel}
         onPanelMouseDown={handlePanelMouseDown}
         onFilterChange={updateFilter}
@@ -194,6 +238,14 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
         onFilterCommit={handleFilterCommit}
         onColorAdjustmentCommit={handleColorAdjustmentCommit}
         onResetAll={handleResetAll}
+        onDownload={handleDownload}
+        onPreviewQuality={handlePreviewQuality}
+        selectedFormat={selectedFormat}
+        jpegQuality={jpegQuality}
+        webpQuality={webpQuality}
+        onFormatChange={handleFormatChange}
+        onJpegQualityChange={handleJpegQualityChange}
+        onWebpQualityChange={handleWebpQualityChange}
       />
     </div>
   )

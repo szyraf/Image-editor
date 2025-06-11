@@ -90,3 +90,106 @@ std::string processImageWithAllFilters(emscripten::val canvas, float brightness,
 
   return canvas.call<std::string>("toDataURL", std::string("image/png"));
 }
+
+/**
+ * @brief Downloads processed image as PNG with maximum quality (lossless)
+ * @param canvas HTML Canvas element containing processed image
+ * @param filename Filename for the download
+ * @return PNG image as data URL string
+ */
+std::string downloadAsPNG(emscripten::val canvas, const std::string &filename)
+{
+  std::string dataUrl = canvas.call<std::string>("toDataURL", std::string("image/png"));
+
+  emscripten::val document = emscripten::val::global("document");
+  emscripten::val link = document.call<emscripten::val>("createElement", std::string("a"));
+
+  link.set("download", filename + ".png");
+  link.set("href", dataUrl);
+
+  emscripten::val body = document["body"];
+  body.call<void>("appendChild", link);
+  link.call<void>("click");
+  body.call<void>("removeChild", link);
+
+  return dataUrl;
+}
+
+/**
+ * @brief Downloads processed image as JPEG with specified quality
+ * @param canvas HTML Canvas element containing processed image
+ * @param filename Filename for the download
+ * @param quality JPEG quality (10-100, where 100 is highest quality)
+ * @return JPEG image as data URL string
+ */
+std::string downloadAsJPEG(emscripten::val canvas, const std::string &filename, int quality)
+{
+  float qualityFloat = std::max(0.1f, std::min(1.0f, quality / 100.0f));
+  std::string dataUrl = canvas.call<std::string>("toDataURL", std::string("image/jpeg"), qualityFloat);
+
+  emscripten::val document = emscripten::val::global("document");
+  emscripten::val link = document.call<emscripten::val>("createElement", std::string("a"));
+
+  link.set("download", filename + ".jpg");
+  link.set("href", dataUrl);
+
+  emscripten::val body = document["body"];
+  body.call<void>("appendChild", link);
+  link.call<void>("click");
+  body.call<void>("removeChild", link);
+
+  return dataUrl;
+}
+
+/**
+ * @brief Downloads processed image as WebP with specified quality
+ * @param canvas HTML Canvas element containing processed image
+ * @param filename Filename for the download
+ * @param quality WebP quality (10-100, where 100 is highest quality)
+ * @return WebP image as data URL string
+ */
+std::string downloadAsWebP(emscripten::val canvas, const std::string &filename, int quality)
+{
+  float qualityFloat = std::max(0.1f, std::min(1.0f, quality / 100.0f));
+  std::string dataUrl = canvas.call<std::string>("toDataURL", std::string("image/webp"), qualityFloat);
+
+  emscripten::val document = emscripten::val::global("document");
+  emscripten::val link = document.call<emscripten::val>("createElement", std::string("a"));
+
+  link.set("download", filename + ".webp");
+  link.set("href", dataUrl);
+
+  emscripten::val body = document["body"];
+  body.call<void>("appendChild", link);
+  link.call<void>("click");
+  body.call<void>("removeChild", link);
+
+  return dataUrl;
+}
+
+/**
+ * @brief Generates preview of image with specific format and quality for display
+ * @param canvas HTML Canvas element containing processed image
+ * @param format Image format ("png", "jpeg", "webp")
+ * @param quality Quality for lossy formats (10-100, ignored for PNG)
+ * @return Image as data URL string for preview
+ */
+std::string getPreviewDataUrl(emscripten::val canvas, const std::string &format, int quality)
+{
+  if (format == "png")
+  {
+    return canvas.call<std::string>("toDataURL", std::string("image/png"));
+  }
+  else if (format == "jpeg")
+  {
+    float qualityFloat = std::max(0.1f, std::min(1.0f, quality / 100.0f));
+    return canvas.call<std::string>("toDataURL", std::string("image/jpeg"), qualityFloat);
+  }
+  else if (format == "webp")
+  {
+    float qualityFloat = std::max(0.1f, std::min(1.0f, quality / 100.0f));
+    return canvas.call<std::string>("toDataURL", std::string("image/webp"), qualityFloat);
+  }
+
+  return canvas.call<std::string>("toDataURL", std::string("image/png"));
+}
