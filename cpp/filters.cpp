@@ -5,11 +5,15 @@
 #include <cmath>
 
 /**
- * @brief Applies Gaussian blur effect to an image using separable Gaussian kernel
+ * @brief Applies Gaussian blur using separable 2-pass convolution
+ *
+ * Uses separable Gaussian kernel: horizontal pass then vertical pass.
+ * Gaussian weight: w(x) = e^(-x²/2σ²) where σ = blurRadius/3
+ *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param blurRadius Blur radius in pixels (sigma = radius / 3)
+ * @param blurRadius Blur radius in pixels (0-50 typical, ≤0 returns original)
  * @return Modified imageData with Gaussian blur applied
  */
 emscripten::val applyBlur(emscripten::val imageData, int width, int height, float blurRadius)
@@ -109,12 +113,16 @@ emscripten::val applyBlur(emscripten::val imageData, int width, int height, floa
 }
 
 /**
- * @brief Applies sharpen effect to an image
+ * @brief Applies unsharp masking using 3x3 convolution kernel
+ *
+ * Kernel: [0 -k 0; -k 1+4k -k; 0 -k 0] where k = sharpenAmount
+ * Only processes interior pixels, edge pixels retain original values.
+ *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param sharpenAmount Sharpen amount (0 to 5)
- * @return Modified imageData with sharpen applied
+ * @param sharpenAmount Sharpening intensity (0-5 range, ≤0 returns original)
+ * @return Modified imageData with sharpening applied
  */
 emscripten::val applySharpen(emscripten::val imageData, int width, int height, float sharpenAmount)
 {
@@ -178,12 +186,16 @@ emscripten::val applySharpen(emscripten::val imageData, int width, int height, f
 }
 
 /**
- * @brief Applies pixelate effect to an image
+ * @brief Creates blocky pixelated effect by averaging pixel blocks
+ *
+ * Divides image into pixelSize×pixelSize blocks, replaces each block
+ * with average color of all pixels in that block.
+ *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param pixelSize Size of each pixel block
- * @return Modified imageData with pixelate applied
+ * @param pixelSize Size of each square block (1-200 range, ≤1 returns original)
+ * @return Modified imageData with pixelate effect applied
  */
 emscripten::val applyPixelate(emscripten::val imageData, int width, int height, int pixelSize)
 {
@@ -244,11 +256,15 @@ emscripten::val applyPixelate(emscripten::val imageData, int width, int height, 
 }
 
 /**
- * @brief Converts an image to monochrome
+ * @brief Converts image to grayscale using luminance weighting
+ *
+ * Uses ITU-R BT.601 formula: Y = 0.299×R + 0.587×G + 0.114×B
+ * Weights account for human eye sensitivity to different colors.
+ *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @return Modified imageData converted to monochrome
+ * @return Modified imageData converted to monochrome, alpha preserved
  */
 emscripten::val convertToMonochrome(emscripten::val imageData, int width, int height)
 {
@@ -280,12 +296,16 @@ emscripten::val convertToMonochrome(emscripten::val imageData, int width, int he
 }
 
 /**
- * @brief Adjusts the brightness of an image by modifying RGB values
+ * @brief Adjusts brightness by adding constant value to RGB channels
+ *
+ * Linear adjustment: new_channel = clamp(original + adjustment, 0, 255)
+ * where adjustment = (brightnessValue / 100) × 255
+ *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param brightnessValue Brightness adjustment value (-100 to 100)
- * @return Modified imageData with adjusted brightness
+ * @param brightnessValue Brightness percentage (-100 to +100, 0 = no change)
+ * @return Modified imageData with adjusted brightness, alpha preserved
  */
 emscripten::val adjustBrightness(emscripten::val imageData, int width, int height, float brightnessValue)
 {
@@ -322,12 +342,16 @@ emscripten::val adjustBrightness(emscripten::val imageData, int width, int heigh
 }
 
 /**
- * @brief Adjusts the contrast of an image
+ * @brief Adjusts contrast using midpoint-anchored scaling around gray 128
+ *
+ * factor = (259 × (contrast×255 + 255)) / (255 × (259 - contrast×255))
+ * new_channel = clamp(factor × (original - 128) + 128, 0, 255)
+ *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param contrastValue Contrast adjustment value (0 to 200, where 100 is normal)
- * @return Modified imageData with adjusted contrast
+ * @param contrastValue Contrast percentage (0-200 range, 100 = no change)
+ * @return Modified imageData with adjusted contrast, alpha preserved
  */
 emscripten::val adjustContrast(emscripten::val imageData, int width, int height, float contrastValue)
 {
@@ -364,12 +388,16 @@ emscripten::val adjustContrast(emscripten::val imageData, int width, int height,
 }
 
 /**
- * @brief Adjusts the saturation of an image
+ * @brief Adjusts saturation by interpolating between original and grayscale
+ *
+ * grayscale = 0.299×R + 0.587×G + 0.114×B
+ * new_channel = clamp(grayscale + saturation × (original - grayscale), 0, 255)
+ *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param saturationValue Saturation adjustment value (0 to 200, where 100 is normal)
- * @return Modified imageData with adjusted saturation
+ * @param saturationValue Saturation percentage (0-200 range, 100 = no change)
+ * @return Modified imageData with adjusted saturation, alpha preserved
  */
 emscripten::val adjustSaturation(emscripten::val imageData, int width, int height, float saturationValue)
 {
@@ -407,12 +435,16 @@ emscripten::val adjustSaturation(emscripten::val imageData, int width, int heigh
 }
 
 /**
- * @brief Applies gamma correction to adjust mid-tone brightness
+ * @brief Applies gamma correction using power-law transformation with lookup table
+ *
+ * Pre-computes lookup table: output = 255 × (input/255)^(1/gamma)
+ * Gamma < 1.0 brightens mid-tones, gamma > 1.0 darkens mid-tones.
+ *
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param gamma Gamma value (0.1 to 3.0, where 1.0 is no change)
- * @return Modified imageData with gamma correction applied
+ * @param gamma Gamma value (0.1-3.0 range, 1.0 = no change)
+ * @return Modified imageData with gamma correction applied, alpha preserved
  */
 emscripten::val adjustGamma(emscripten::val imageData, int width, int height, float gamma)
 {
