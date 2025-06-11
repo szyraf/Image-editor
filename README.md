@@ -35,7 +35,7 @@ python watch_cpp_folder.py
 ## Deployment
 
 ```bash
-git clone https://github.com/your-username/image-editor.git
+git clone https://github.com/szyraf/Image-editor.git
 cd Image-editor/
 sudo bash deploy.sh
 ```
