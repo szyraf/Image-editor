@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { X, Loader2 } from 'lucide-react'
 import { FullscreenImageViewerProps } from './types'
@@ -11,6 +11,7 @@ import { useImageProcessing } from './hooks/useImageProcessing'
 import { DebugMenu } from './components/DebugMenu'
 import { EditPanel } from './components/EditPanel'
 import { ImageControls } from './components/ImageControls'
+import { ImageFilters, ColorAdjustments } from './types'
 
 export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onClose }: FullscreenImageViewerProps) {
   const {
@@ -33,7 +34,45 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
 
   const { filters, colorAdjustments, updateFilter, updateColorAdjustment, resetAll } = useImageFilters()
 
+  const [committedFilters, setCommittedFilters] = useState<ImageFilters>({
+    blur: 0,
+    sharpen: 0,
+    pixelate: 0,
+  })
+
+  const [committedColorAdjustments, setCommittedColorAdjustments] = useState<ColorAdjustments>({
+    monochrome: false,
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
+    gamma: 100,
+  })
+
   const { processedImageUrl, processImage, isProcessing } = useImageProcessing(imageUrl)
+
+  const handleFilterCommit = useCallback((key: keyof ImageFilters, value: number) => {
+    setCommittedFilters((prev) => ({ ...prev, [key]: value }))
+  }, [])
+
+  const handleColorAdjustmentCommit = useCallback((key: keyof ColorAdjustments, value: number | boolean) => {
+    setCommittedColorAdjustments((prev) => ({ ...prev, [key]: value }))
+  }, [])
+
+  const handleResetAll = useCallback(() => {
+    resetAll()
+    setCommittedFilters({
+      blur: 0,
+      sharpen: 0,
+      pixelate: 0,
+    })
+    setCommittedColorAdjustments({
+      monochrome: false,
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      gamma: 100,
+    })
+  }, [resetAll])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -51,9 +90,9 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
 
   useEffect(() => {
     if (isOpen) {
-      void processImage({ filters, colorAdjustments })
+      void processImage({ filters: committedFilters, colorAdjustments: committedColorAdjustments })
     }
-  }, [filters, colorAdjustments, isOpen, processImage])
+  }, [committedFilters, committedColorAdjustments, isOpen, processImage])
 
   useEffect(() => {
     if (isOpen) {
@@ -152,7 +191,9 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
         onPanelMouseDown={handlePanelMouseDown}
         onFilterChange={updateFilter}
         onColorAdjustmentChange={updateColorAdjustment}
-        onResetAll={resetAll}
+        onFilterCommit={handleFilterCommit}
+        onColorAdjustmentCommit={handleColorAdjustmentCommit}
+        onResetAll={handleResetAll}
       />
     </div>
   )

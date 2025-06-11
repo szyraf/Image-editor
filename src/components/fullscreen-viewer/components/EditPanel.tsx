@@ -5,7 +5,8 @@ import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import { X, Settings, Loader2 } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { X, Settings, Loader2, Info } from 'lucide-react'
 import { Position, ImageFilters, ColorAdjustments } from '../types'
 
 interface EditPanelProps {
@@ -18,6 +19,8 @@ interface EditPanelProps {
   onPanelMouseDown: (e: React.MouseEvent) => void
   onFilterChange: (key: keyof ImageFilters, value: number) => void
   onColorAdjustmentChange: (key: keyof ColorAdjustments, value: number | boolean) => void
+  onFilterCommit: (key: keyof ImageFilters, value: number) => void
+  onColorAdjustmentCommit: (key: keyof ColorAdjustments, value: number | boolean) => void
   onResetAll: () => void
 }
 
@@ -31,6 +34,8 @@ export const EditPanel = ({
   onPanelMouseDown,
   onFilterChange,
   onColorAdjustmentChange,
+  onFilterCommit,
+  onColorAdjustmentCommit,
   onResetAll,
 }: EditPanelProps) => {
   if (!showEditPanel) {
@@ -73,15 +78,28 @@ export const EditPanel = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Blur</Label>
+                <div className="flex items-center gap-1">
+                  <Label className="text-sm font-medium">Blur</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3 h-3 text-muted-foreground hover:text-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Gaussian Blur</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <span className="text-xs text-muted-foreground">{filters.blur}px</span>
               </div>
               <Slider
                 value={[filters.blur]}
                 onValueChange={(value) => onFilterChange('blur', value[0])}
-                max={10}
+                onValueCommit={(value) => onFilterCommit('blur', value[0])}
+                max={100}
                 min={0}
-                step={0.1}
+                step={1}
                 className="w-full"
               />
             </div>
@@ -94,6 +112,7 @@ export const EditPanel = ({
               <Slider
                 value={[filters.sharpen]}
                 onValueChange={(value) => onFilterChange('sharpen', value[0])}
+                onValueCommit={(value) => onFilterCommit('sharpen', value[0])}
                 max={5}
                 min={0}
                 step={0.1}
@@ -109,7 +128,8 @@ export const EditPanel = ({
               <Slider
                 value={[filters.pixelate]}
                 onValueChange={(value) => onFilterChange('pixelate', value[0])}
-                max={20}
+                onValueCommit={(value) => onFilterCommit('pixelate', value[0])}
+                max={100}
                 min={0}
                 step={1}
                 className="w-full"
@@ -128,7 +148,10 @@ export const EditPanel = ({
               <Switch
                 id="monochrome"
                 checked={colorAdjustments.monochrome}
-                onCheckedChange={(value) => onColorAdjustmentChange('monochrome', value)}
+                onCheckedChange={(value) => {
+                  onColorAdjustmentChange('monochrome', value)
+                  onColorAdjustmentCommit('monochrome', value)
+                }}
               />
               <Label htmlFor="monochrome" className="text-sm font-medium">
                 Monochrome
@@ -143,6 +166,7 @@ export const EditPanel = ({
               <Slider
                 value={[colorAdjustments.brightness]}
                 onValueChange={(value) => onColorAdjustmentChange('brightness', value[0])}
+                onValueCommit={(value) => onColorAdjustmentCommit('brightness', value[0])}
                 max={200}
                 min={0}
                 step={1}
@@ -158,6 +182,7 @@ export const EditPanel = ({
               <Slider
                 value={[colorAdjustments.contrast]}
                 onValueChange={(value) => onColorAdjustmentChange('contrast', value[0])}
+                onValueCommit={(value) => onColorAdjustmentCommit('contrast', value[0])}
                 max={200}
                 min={0}
                 step={1}
@@ -173,8 +198,25 @@ export const EditPanel = ({
               <Slider
                 value={[colorAdjustments.saturation]}
                 onValueChange={(value) => onColorAdjustmentChange('saturation', value[0])}
+                onValueCommit={(value) => onColorAdjustmentCommit('saturation', value[0])}
                 max={200}
                 min={0}
+                step={1}
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Gamma</Label>
+                <span className="text-xs text-muted-foreground">{colorAdjustments.gamma}%</span>
+              </div>
+              <Slider
+                value={[colorAdjustments.gamma]}
+                onValueChange={(value) => onColorAdjustmentChange('gamma', value[0])}
+                onValueCommit={(value) => onColorAdjustmentCommit('gamma', value[0])}
+                max={200}
+                min={50}
                 step={1}
                 className="w-full"
               />

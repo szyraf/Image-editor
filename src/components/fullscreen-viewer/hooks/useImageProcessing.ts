@@ -20,6 +20,7 @@ export const useImageProcessing = (originalImageUrl: string | null) => {
       options.colorAdjustments.brightness === 100 &&
       options.colorAdjustments.contrast === 100 &&
       options.colorAdjustments.saturation === 100 &&
+      options.colorAdjustments.gamma === 100 &&
       !options.colorAdjustments.monochrome
     )
   }, [])
@@ -63,7 +64,8 @@ export const useImageProcessing = (originalImageUrl: string | null) => {
           options.colorAdjustments.monochrome,
           options.filters.blur,
           options.filters.sharpen,
-          options.filters.pixelate
+          options.filters.pixelate,
+          options.colorAdjustments.gamma
         )
 
         setProcessedImageUrl(processedUrl)

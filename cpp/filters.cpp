@@ -5,175 +5,12 @@
 #include <cmath>
 
 /**
- * @brief Adjusts the brightness of an image by modifying RGB values
+ * @brief Applies Gaussian blur effect to an image using separable Gaussian kernel
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @param brightnessValue Brightness adjustment value (-100 to 100)
- * @return Modified imageData with adjusted brightness
- */
-emscripten::val adjustBrightness(emscripten::val imageData, int width, int height, float brightnessValue)
-{
-  float brightnessAdjustment = (brightnessValue / 100.0f) * 255.0f;
-
-  int length = width * height * 4;
-
-  std::vector<uint8_t> modifiedData(length);
-
-  for (int i = 0; i < length; i += 4)
-  {
-    float r = imageData[i].as<float>();
-    float g = imageData[i + 1].as<float>();
-    float b = imageData[i + 2].as<float>();
-    float a = imageData[i + 3].as<float>();
-
-    r += brightnessAdjustment;
-    g += brightnessAdjustment;
-    b += brightnessAdjustment;
-
-    modifiedData[i] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, r)));
-    modifiedData[i + 1] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, g)));
-    modifiedData[i + 2] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, b)));
-    modifiedData[i + 3] = static_cast<uint8_t>(a);
-  }
-
-  emscripten::val result = emscripten::val::array();
-  for (int i = 0; i < length; ++i)
-  {
-    result.call<void>("push", modifiedData[i]);
-  }
-
-  return result;
-}
-
-/**
- * @brief Adjusts the contrast of an image
- * @param imageData Uint8ClampedArray containing RGBA pixel data
- * @param width Width of the image in pixels
- * @param height Height of the image in pixels
- * @param contrastValue Contrast adjustment value (0 to 200, where 100 is normal)
- * @return Modified imageData with adjusted contrast
- */
-emscripten::val adjustContrast(emscripten::val imageData, int width, int height, float contrastValue)
-{
-  float contrast = contrastValue / 100.0f;
-  float factor = (259.0f * (contrast * 255.0f + 255.0f)) / (255.0f * (259.0f - contrast * 255.0f));
-
-  int length = width * height * 4;
-  std::vector<uint8_t> modifiedData(length);
-
-  for (int i = 0; i < length; i += 4)
-  {
-    float r = imageData[i].as<float>();
-    float g = imageData[i + 1].as<float>();
-    float b = imageData[i + 2].as<float>();
-    float a = imageData[i + 3].as<float>();
-
-    r = factor * (r - 128.0f) + 128.0f;
-    g = factor * (g - 128.0f) + 128.0f;
-    b = factor * (b - 128.0f) + 128.0f;
-
-    modifiedData[i] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, r)));
-    modifiedData[i + 1] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, g)));
-    modifiedData[i + 2] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, b)));
-    modifiedData[i + 3] = static_cast<uint8_t>(a);
-  }
-
-  emscripten::val result = emscripten::val::array();
-  for (int i = 0; i < length; ++i)
-  {
-    result.call<void>("push", modifiedData[i]);
-  }
-
-  return result;
-}
-
-/**
- * @brief Adjusts the saturation of an image
- * @param imageData Uint8ClampedArray containing RGBA pixel data
- * @param width Width of the image in pixels
- * @param height Height of the image in pixels
- * @param saturationValue Saturation adjustment value (0 to 200, where 100 is normal)
- * @return Modified imageData with adjusted saturation
- */
-emscripten::val adjustSaturation(emscripten::val imageData, int width, int height, float saturationValue)
-{
-  float saturation = saturationValue / 100.0f;
-
-  int length = width * height * 4;
-  std::vector<uint8_t> modifiedData(length);
-
-  for (int i = 0; i < length; i += 4)
-  {
-    float r = imageData[i].as<float>();
-    float g = imageData[i + 1].as<float>();
-    float b = imageData[i + 2].as<float>();
-    float a = imageData[i + 3].as<float>();
-
-    float gray = 0.299f * r + 0.587f * g + 0.114f * b;
-
-    r = gray + saturation * (r - gray);
-    g = gray + saturation * (g - gray);
-    b = gray + saturation * (b - gray);
-
-    modifiedData[i] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, r)));
-    modifiedData[i + 1] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, g)));
-    modifiedData[i + 2] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, b)));
-    modifiedData[i + 3] = static_cast<uint8_t>(a);
-  }
-
-  emscripten::val result = emscripten::val::array();
-  for (int i = 0; i < length; ++i)
-  {
-    result.call<void>("push", modifiedData[i]);
-  }
-
-  return result;
-}
-
-/**
- * @brief Converts an image to monochrome
- * @param imageData Uint8ClampedArray containing RGBA pixel data
- * @param width Width of the image in pixels
- * @param height Height of the image in pixels
- * @return Modified imageData converted to monochrome
- */
-emscripten::val convertToMonochrome(emscripten::val imageData, int width, int height)
-{
-  int length = width * height * 4;
-  std::vector<uint8_t> modifiedData(length);
-
-  for (int i = 0; i < length; i += 4)
-  {
-    float r = imageData[i].as<float>();
-    float g = imageData[i + 1].as<float>();
-    float b = imageData[i + 2].as<float>();
-    float a = imageData[i + 3].as<float>();
-
-    uint8_t gray = static_cast<uint8_t>(0.299f * r + 0.587f * g + 0.114f * b);
-
-    modifiedData[i] = gray;
-    modifiedData[i + 1] = gray;
-    modifiedData[i + 2] = gray;
-    modifiedData[i + 3] = static_cast<uint8_t>(a);
-  }
-
-  emscripten::val result = emscripten::val::array();
-  for (int i = 0; i < length; ++i)
-  {
-    result.call<void>("push", modifiedData[i]);
-  }
-
-  return result;
-}
-
-/**
- * @brief Applies blur effect to an image
- * @param imageData Uint8ClampedArray containing RGBA pixel data
- * @param width Width of the image in pixels
- * @param height Height of the image in pixels
- * @param blurRadius Blur radius in pixels
- * @return Modified imageData with blur applied
+ * @param blurRadius Blur radius in pixels (sigma = radius / 3)
+ * @return Modified imageData with Gaussian blur applied
  */
 emscripten::val applyBlur(emscripten::val imageData, int width, int height, float blurRadius)
 {
@@ -183,48 +20,89 @@ emscripten::val applyBlur(emscripten::val imageData, int width, int height, floa
   }
 
   int length = width * height * 4;
-  std::vector<uint8_t> modifiedData(length);
-
   int radius = static_cast<int>(std::ceil(blurRadius));
+  float sigma = blurRadius / 3.0f;
+
+  std::vector<uint8_t> inputData(length);
+  for (int i = 0; i < length; ++i)
+  {
+    inputData[i] = imageData[i].as<uint8_t>();
+  }
+
+  std::vector<float> gaussianKernel(2 * radius + 1);
+  float kernelSum = 0.0f;
+
+  for (int i = -radius; i <= radius; ++i)
+  {
+    float weight = std::exp(-(i * i) / (2.0f * sigma * sigma));
+    gaussianKernel[i + radius] = weight;
+    kernelSum += weight;
+  }
+
+  for (int i = 0; i < gaussianKernel.size(); ++i)
+  {
+    gaussianKernel[i] /= kernelSum;
+  }
+
+  std::vector<uint8_t> tempData(length);
+  std::vector<uint8_t> outputData(length);
 
   for (int y = 0; y < height; ++y)
   {
     for (int x = 0; x < width; ++x)
     {
-      float totalR = 0, totalG = 0, totalB = 0, totalA = 0;
-      int count = 0;
+      float totalR = 0.0f, totalG = 0.0f, totalB = 0.0f, totalA = 0.0f;
 
-      for (int dy = -radius; dy <= radius; ++dy)
+      for (int i = -radius; i <= radius; ++i)
       {
-        for (int dx = -radius; dx <= radius; ++dx)
-        {
-          int nx = x + dx;
-          int ny = y + dy;
+        int sx = std::max(0, std::min(width - 1, x + i));
+        int index = (y * width + sx) * 4;
+        float weight = gaussianKernel[i + radius];
 
-          if (nx >= 0 && nx < width && ny >= 0 && ny < height)
-          {
-            int index = (ny * width + nx) * 4;
-            totalR += imageData[index].as<float>();
-            totalG += imageData[index + 1].as<float>();
-            totalB += imageData[index + 2].as<float>();
-            totalA += imageData[index + 3].as<float>();
-            count++;
-          }
-        }
+        totalR += inputData[index] * weight;
+        totalG += inputData[index + 1] * weight;
+        totalB += inputData[index + 2] * weight;
+        totalA += inputData[index + 3] * weight;
       }
 
       int index = (y * width + x) * 4;
-      modifiedData[index] = static_cast<uint8_t>(totalR / count);
-      modifiedData[index + 1] = static_cast<uint8_t>(totalG / count);
-      modifiedData[index + 2] = static_cast<uint8_t>(totalB / count);
-      modifiedData[index + 3] = static_cast<uint8_t>(totalA / count);
+      tempData[index] = static_cast<uint8_t>(std::round(totalR));
+      tempData[index + 1] = static_cast<uint8_t>(std::round(totalG));
+      tempData[index + 2] = static_cast<uint8_t>(std::round(totalB));
+      tempData[index + 3] = static_cast<uint8_t>(std::round(totalA));
+    }
+  }
+
+  for (int x = 0; x < width; ++x)
+  {
+    for (int y = 0; y < height; ++y)
+    {
+      float totalR = 0.0f, totalG = 0.0f, totalB = 0.0f, totalA = 0.0f;
+
+      for (int i = -radius; i <= radius; ++i)
+      {
+        int sy = std::max(0, std::min(height - 1, y + i));
+        int index = (sy * width + x) * 4;
+        float weight = gaussianKernel[i + radius];
+
+        totalR += tempData[index] * weight;
+        totalG += tempData[index + 1] * weight;
+        totalB += tempData[index + 2] * weight;
+        totalA += tempData[index + 3] * weight;
+      }
+
+      int index = (y * width + x) * 4;
+      outputData[index] = static_cast<uint8_t>(std::round(totalR));
+      outputData[index + 1] = static_cast<uint8_t>(std::round(totalG));
+      outputData[index + 2] = static_cast<uint8_t>(std::round(totalB));
+      outputData[index + 3] = static_cast<uint8_t>(std::round(totalA));
     }
   }
 
   emscripten::val result = emscripten::val::array();
   for (int i = 0; i < length; ++i)
   {
-    result.call<void>("push", modifiedData[i]);
+    result.call<void>("push", outputData[i]);
   }
 
   return result;
@@ -366,45 +244,166 @@ emscripten::val applyPixelate(emscripten::val imageData, int width, int height, 
 }
 
 /**
- * @brief Applies auto-brightness correction based on histogram analysis
+ * @brief Converts an image to monochrome
  * @param imageData Uint8ClampedArray containing RGBA pixel data
  * @param width Width of the image in pixels
  * @param height Height of the image in pixels
- * @return Modified imageData with auto-corrected brightness
+ * @return Modified imageData converted to monochrome
  */
-emscripten::val autoBrightness(emscripten::val imageData, int width, int height)
+emscripten::val convertToMonochrome(emscripten::val imageData, int width, int height)
 {
   int length = width * height * 4;
-  std::vector<int> histogram(256, 0);
+  std::vector<uint8_t> modifiedData(length);
 
   for (int i = 0; i < length; i += 4)
   {
     float r = imageData[i].as<float>();
     float g = imageData[i + 1].as<float>();
     float b = imageData[i + 2].as<float>();
+    float a = imageData[i + 3].as<float>();
 
-    int luminance = static_cast<int>(0.299f * r + 0.587f * g + 0.114f * b);
-    histogram[luminance]++;
+    uint8_t gray = static_cast<uint8_t>(0.299f * r + 0.587f * g + 0.114f * b);
+
+    modifiedData[i] = gray;
+    modifiedData[i + 1] = gray;
+    modifiedData[i + 2] = gray;
+    modifiedData[i + 3] = static_cast<uint8_t>(a);
   }
 
-  int totalPixels = width * height;
-  int medianTarget = totalPixels / 2;
-  int currentSum = 0;
-  int medianBrightness = 128;
-
-  for (int i = 0; i < 256; ++i)
+  emscripten::val result = emscripten::val::array();
+  for (int i = 0; i < length; ++i)
   {
-    currentSum += histogram[i];
-    if (currentSum >= medianTarget)
-    {
-      medianBrightness = i;
-      break;
-    }
+    result.call<void>("push", modifiedData[i]);
   }
 
-  float adjustment = 128.0f - medianBrightness;
+  return result;
+}
 
-  return adjustBrightness(imageData, width, height, (adjustment / 255.0f) * 100.0f);
+/**
+ * @brief Adjusts the brightness of an image by modifying RGB values
+ * @param imageData Uint8ClampedArray containing RGBA pixel data
+ * @param width Width of the image in pixels
+ * @param height Height of the image in pixels
+ * @param brightnessValue Brightness adjustment value (-100 to 100)
+ * @return Modified imageData with adjusted brightness
+ */
+emscripten::val adjustBrightness(emscripten::val imageData, int width, int height, float brightnessValue)
+{
+  float brightnessAdjustment = (brightnessValue / 100.0f) * 255.0f;
+
+  int length = width * height * 4;
+
+  std::vector<uint8_t> modifiedData(length);
+
+  for (int i = 0; i < length; i += 4)
+  {
+    float r = imageData[i].as<float>();
+    float g = imageData[i + 1].as<float>();
+    float b = imageData[i + 2].as<float>();
+    float a = imageData[i + 3].as<float>();
+
+    r += brightnessAdjustment;
+    g += brightnessAdjustment;
+    b += brightnessAdjustment;
+
+    modifiedData[i] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, r)));
+    modifiedData[i + 1] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, g)));
+    modifiedData[i + 2] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, b)));
+    modifiedData[i + 3] = static_cast<uint8_t>(a);
+  }
+
+  emscripten::val result = emscripten::val::array();
+  for (int i = 0; i < length; ++i)
+  {
+    result.call<void>("push", modifiedData[i]);
+  }
+
+  return result;
+}
+
+/**
+ * @brief Adjusts the contrast of an image
+ * @param imageData Uint8ClampedArray containing RGBA pixel data
+ * @param width Width of the image in pixels
+ * @param height Height of the image in pixels
+ * @param contrastValue Contrast adjustment value (0 to 200, where 100 is normal)
+ * @return Modified imageData with adjusted contrast
+ */
+emscripten::val adjustContrast(emscripten::val imageData, int width, int height, float contrastValue)
+{
+  float contrast = contrastValue / 100.0f;
+  float factor = (259.0f * (contrast * 255.0f + 255.0f)) / (255.0f * (259.0f - contrast * 255.0f));
+
+  int length = width * height * 4;
+  std::vector<uint8_t> modifiedData(length);
+
+  for (int i = 0; i < length; i += 4)
+  {
+    float r = imageData[i].as<float>();
+    float g = imageData[i + 1].as<float>();
+    float b = imageData[i + 2].as<float>();
+    float a = imageData[i + 3].as<float>();
+
+    r = factor * (r - 128.0f) + 128.0f;
+    g = factor * (g - 128.0f) + 128.0f;
+    b = factor * (b - 128.0f) + 128.0f;
+
+    modifiedData[i] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, r)));
+    modifiedData[i + 1] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, g)));
+    modifiedData[i + 2] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, b)));
+    modifiedData[i + 3] = static_cast<uint8_t>(a);
+  }
+
+  emscripten::val result = emscripten::val::array();
+  for (int i = 0; i < length; ++i)
+  {
+    result.call<void>("push", modifiedData[i]);
+  }
+
+  return result;
+}
+
+/**
+ * @brief Adjusts the saturation of an image
+ * @param imageData Uint8ClampedArray containing RGBA pixel data
+ * @param width Width of the image in pixels
+ * @param height Height of the image in pixels
+ * @param saturationValue Saturation adjustment value (0 to 200, where 100 is normal)
+ * @return Modified imageData with adjusted saturation
+ */
+emscripten::val adjustSaturation(emscripten::val imageData, int width, int height, float saturationValue)
+{
+  float saturation = saturationValue / 100.0f;
+
+  int length = width * height * 4;
+  std::vector<uint8_t> modifiedData(length);
+
+  for (int i = 0; i < length; i += 4)
+  {
+    float r = imageData[i].as<float>();
+    float g = imageData[i + 1].as<float>();
+    float b = imageData[i + 2].as<float>();
+    float a = imageData[i + 3].as<float>();
+
+    float gray = 0.299f * r + 0.587f * g + 0.114f * b;
+
+    r = gray + saturation * (r - gray);
+    g = gray + saturation * (g - gray);
+    b = gray + saturation * (b - gray);
+
+    modifiedData[i] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, r)));
+    modifiedData[i + 1] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, g)));
+    modifiedData[i + 2] = static_cast<uint8_t>(std::max(0.0f, std::min(255.0f, b)));
+    modifiedData[i + 3] = static_cast<uint8_t>(a);
+  }
+
+  emscripten::val result = emscripten::val::array();
+  for (int i = 0; i < length; ++i)
+  {
+    result.call<void>("push", modifiedData[i]);
+  }
+
+  return result;
 }
 
 /**

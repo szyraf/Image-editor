@@ -13,6 +13,7 @@ export const useImageFilters = () => {
     brightness: 100,
     contrast: 100,
     saturation: 100,
+    gamma: 100,
   })
 
   const updateFilter = (key: keyof ImageFilters, value: number) => {
@@ -34,6 +35,7 @@ export const useImageFilters = () => {
       brightness: 100,
       contrast: 100,
       saturation: 100,
+      gamma: 100,
     })
   }
 
