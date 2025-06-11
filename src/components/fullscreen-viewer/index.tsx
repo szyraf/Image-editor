@@ -22,6 +22,9 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    handleTouchStart,
+    handleTouchMoveNative,
+    handleTouchEnd,
     handleZoomIn,
     handleZoomOut,
     handleReset,
@@ -129,6 +132,11 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
     handlePanelMouseUp()
   }, [handleMouseUp, handlePanelMouseUp])
 
+  const handleCombinedTouchEnd = useCallback(() => {
+    handleTouchEnd()
+    handlePanelMouseUp()
+  }, [handleTouchEnd, handlePanelMouseUp])
+
   useEffect(() => {
     if (isOpen) {
       updatePreview(selectedFormat, getCurrentQuality(), {
@@ -143,17 +151,23 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
       const container = containerRef.current
       if (container) {
         container.addEventListener('wheel', handleWheel, { passive: false })
+        container.addEventListener('touchstart', handleTouchStart, { passive: false })
         document.addEventListener('mousemove', handleMouseMove)
         document.addEventListener('mousemove', handlePanelMouseMove)
         document.addEventListener('mouseup', handleCombinedMouseUp)
+        document.addEventListener('touchmove', handleTouchMoveNative, { passive: false })
+        document.addEventListener('touchend', handleCombinedTouchEnd)
         document.addEventListener('keydown', handleKeyDown)
         window.addEventListener('resize', handleWindowResize)
 
         return () => {
           container.removeEventListener('wheel', handleWheel)
+          container.removeEventListener('touchstart', handleTouchStart)
           document.removeEventListener('mousemove', handleMouseMove)
           document.removeEventListener('mousemove', handlePanelMouseMove)
           document.removeEventListener('mouseup', handleCombinedMouseUp)
+          document.removeEventListener('touchmove', handleTouchMoveNative)
+          document.removeEventListener('touchend', handleCombinedTouchEnd)
           document.removeEventListener('keydown', handleKeyDown)
           window.removeEventListener('resize', handleWindowResize)
         }
@@ -162,9 +176,12 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
   }, [
     isOpen,
     handleWheel,
+    handleTouchStart,
     handleMouseMove,
     handlePanelMouseMove,
     handleCombinedMouseUp,
+    handleTouchMoveNative,
+    handleCombinedTouchEnd,
     handleKeyDown,
     handleWindowResize,
   ])
