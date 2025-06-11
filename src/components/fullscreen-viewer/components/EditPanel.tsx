@@ -95,19 +95,7 @@ export const EditPanel = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                  <Label className="text-sm font-medium">Blur</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="w-3 h-3 text-muted-foreground hover:text-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Gaussian Blur</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+                <Label className="text-sm font-medium">Gaussian blur</Label>
                 <span className="text-xs text-muted-foreground">{filters.blur}px</span>
               </div>
               <Slider
