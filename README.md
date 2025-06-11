@@ -31,3 +31,13 @@ python watch_cpp_folder.py
 ![Screenshot 1](./screenshots/1.png)
 ![Screenshot 2](./screenshots/2.png)
 ![Screenshot 3](./screenshots/3.png)
+
+## Deployment
+
+```bash
+git clone https://github.com/your-username/image-editor.git
+cd Image-editor/
+sudo bash deploy.sh
+```
+
+open port 3000 on your server

@@ -1,11 +1,11 @@
 services:
-  # Development configuration
+  # Production configuration
   app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '0.0.0.0:8080:3000'
+      - '0.0.0.0:3000:3000'
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
