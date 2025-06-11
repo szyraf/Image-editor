@@ -43,10 +43,6 @@ export const DebugMenu = ({ showDebugMenu, onToggle }: DebugMenuProps) => {
                 <span className="text-muted-foreground">Greet Output:</span>
                 <span className="font-mono text-green-500">{instance?.greet() || 'No instance'}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <span className="text-muted-foreground">Greet Output:</span>
-                <span className="font-mono text-green-500">{instance?.greet2() || 'No instance'}</span>
-              </div>
             </div>
           </div>
         </div>

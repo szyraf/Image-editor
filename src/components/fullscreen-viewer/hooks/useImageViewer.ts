@@ -9,7 +9,7 @@ export const useImageViewer = (isOpen: boolean) => {
     dragStart: { x: 0, y: 0 },
     dragStartPosition: { x: 0, y: 0 },
     showEditPanel: true,
-    showDebugMenu: true,
+    showDebugMenu: false,
   })
 
   const containerRef = useRef<HTMLDivElement>(null)

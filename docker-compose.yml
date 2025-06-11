@@ -27,7 +27,8 @@ services:
     volumes:
       - ./cpp/CMakeLists.txt:/app/cpp/CMakeLists.txt
       - ./cpp/main.cpp:/app/cpp/main.cpp
-      - ./cpp/brightness.cpp:/app/cpp/brightness.cpp
+      - ./cpp/filters.cpp:/app/cpp/filters.cpp
+      - ./cpp/js.cpp:/app/cpp/js.cpp
       - wasm_files:/app/public/wasm
     restart: unless-stopped
 

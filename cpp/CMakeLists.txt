@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(ImageEditorWasm)
 
-# Combined module with both main.cpp and brightness.cpp
-add_executable(main main.cpp brightness.cpp)
+add_executable(main main.cpp filters.cpp js.cpp)
 
 target_link_options(main PRIVATE
     -sWASM=1

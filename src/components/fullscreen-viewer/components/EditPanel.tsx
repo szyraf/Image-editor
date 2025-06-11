@@ -5,7 +5,7 @@ import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import { X, Settings } from 'lucide-react'
+import { X, Settings, Loader2 } from 'lucide-react'
 import { Position, ImageFilters, ColorAdjustments } from '../types'
 
 interface EditPanelProps {
@@ -13,6 +13,7 @@ interface EditPanelProps {
   panelPosition: Position
   filters: ImageFilters
   colorAdjustments: ColorAdjustments
+  isProcessing?: boolean
   onTogglePanel: () => void
   onPanelMouseDown: (e: React.MouseEvent) => void
   onFilterChange: (key: keyof ImageFilters, value: number) => void
@@ -25,6 +26,7 @@ export const EditPanel = ({
   panelPosition,
   filters,
   colorAdjustments,
+  isProcessing,
   onTogglePanel,
   onPanelMouseDown,
   onFilterChange,
@@ -56,7 +58,10 @@ export const EditPanel = ({
     >
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between cursor-move" onMouseDown={onPanelMouseDown}>
-          <h3 className="text-lg font-semibold text-foreground">Edit Options</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-foreground">Edit Options</h3>
+            {isProcessing && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
+          </div>
           <Button variant="ghost" size="sm" onClick={onTogglePanel} className="h-8 w-8 p-0">
             <X className="w-4 h-4" />
           </Button>
@@ -182,9 +187,6 @@ export const EditPanel = ({
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex-1" onClick={onResetAll}>
             Reset All
-          </Button>
-          <Button size="sm" className="flex-1">
-            Apply Changes
           </Button>
         </div>
       </div>

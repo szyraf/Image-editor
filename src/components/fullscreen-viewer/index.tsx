@@ -2,11 +2,12 @@
 
 import { useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
+import { X, Loader2 } from 'lucide-react'
 import { FullscreenImageViewerProps } from './types'
 import { useImageViewer } from './hooks/useImageViewer'
 import { usePanelDrag } from './hooks/usePanelDrag'
 import { useImageFilters } from './hooks/useImageFilters'
+import { useImageProcessing } from './hooks/useImageProcessing'
 import { DebugMenu } from './components/DebugMenu'
 import { EditPanel } from './components/EditPanel'
 import { ImageControls } from './components/ImageControls'
@@ -32,6 +33,8 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
 
   const { filters, colorAdjustments, updateFilter, updateColorAdjustment, resetAll } = useImageFilters()
 
+  const { processedImageUrl, processImage, isProcessing } = useImageProcessing(imageUrl)
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -45,6 +48,12 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
     handleMouseUp()
     handlePanelMouseUp()
   }, [handleMouseUp, handlePanelMouseUp])
+
+  useEffect(() => {
+    if (isOpen) {
+      void processImage({ filters, colorAdjustments })
+    }
+  }, [filters, colorAdjustments, isOpen, processImage])
 
   useEffect(() => {
     if (isOpen) {
@@ -121,7 +130,7 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
 
         <img
           ref={imageRef}
-          src={imageUrl}
+          src={processedImageUrl || imageUrl}
           alt={imageName || 'Fullscreen image'}
           className="absolute select-none pointer-events-none"
           style={{
@@ -138,6 +147,7 @@ export default function FullscreenImageViewer({ imageUrl, imageName, isOpen, onC
         panelPosition={panelPosition}
         filters={filters}
         colorAdjustments={colorAdjustments}
+        isProcessing={isProcessing}
         onTogglePanel={toggleEditPanel}
         onPanelMouseDown={handlePanelMouseDown}
         onFilterChange={updateFilter}
