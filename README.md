@@ -14,17 +14,40 @@ For cpp hotreloading:
 python watch_cpp_folder.py
 ```
 
-## Technologies
+## Architecture
 
-- React
-- Next.js
-- TypeScript
-- Tailwind CSS
-- Shadcn UI
-- WASM (WebAssembly)
-- Emscripten
-- C++
-- Docker
+C++ → WASM → Next.js pipeline for high-performance image processing.
+
+### Processing Pipeline
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant React
+    participant WASM
+
+    User->>React: Upload & Edit Image
+    React->>WASM: processImageWithAllFilters()
+    WASM->>WASM: Apply C++ Filters
+    WASM->>React: Return Processed Image
+    React->>User: Display Result
+```
+
+### Architecture Layers
+
+| Layer              | Technology          | Purpose                           | Key Files                               |
+| ------------------ | ------------------- | --------------------------------- | --------------------------------------- |
+| **Presentation**   | Next.js + React     | User Interface & State Management | `src/components/`                       |
+| **Integration**    | TypeScript Hooks    | Bridge between UI and WASM        | `src/contexts/WasmContext.tsx`          |
+| **Computation**    | C++ + WebAssembly   | High-performance image processing | `cpp/filters.cpp`, `cpp/js.cpp`         |
+| **Infrastructure** | Docker + Emscripten | Build environment & compilation   | `Dockerfile.wasm`, `cpp/CMakeLists.txt` |
+
+### How It Works
+
+1. C++ image processing functions compiled to WASM
+2. React app loads WASM module dynamically
+3. User interactions call C++ functions via WASM
+4. Real-time image processing with near-native performance
 
 ## Screenshots
 
